@@ -6,6 +6,6 @@ const router = express.Router();
 
 /* READ */
 // router.get("/", verifyToken, getPosts);
-router.get("/:userId/posts", verifyToken, getPosts);
+router.get("/myPosts", verifyToken, getPosts);
 
 export default router;

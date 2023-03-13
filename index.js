@@ -47,8 +47,8 @@ const upload = multer({ storage }); // use this variable to upload a file
 
 
 /* ROUTES WITH FILES */
-app.post("/auth/signup", upload.single("picture"), signup); // uploads the profile pic to storage
-app.post("/posts", verifyToken, upload.single("picture"), createPost);
+app.post("/auth/signup", upload.single("profilePicture"), signup); // uploads the profile pic to storage
+app.post("/posts/savePost", verifyToken, upload.single("memoryPicture"), createPost); // uploads the memory image to storage
 
 /* ROUTES */
 app.use("/auth", authRoutes);
