@@ -7,18 +7,17 @@ import multer from "multer";
 import helmet from "helmet";
 import morgan from "morgan";
 import path from "path";
-import { fileURLToPath } from "url";
+import crypto from "crypto";
+import { GridFsStorage } from "multer-gridfs-storage";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import postRoutes from "./routes/posts.js";
+import imageRoutes from "./routes/images.js";
 import { signup } from "./controllers/auth.js";
 import { createPost } from "./controllers/posts.js";
 import { verifyToken } from "./middleware/auth.js";
 
-
 /* CONFIGURATIONS */
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 dotenv.config();
 
 // create and invoke express app
@@ -30,26 +29,33 @@ app.use(morgan("common"));
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors()); // cross origin sharing policies
-app.use("/assets", express.static(path.join(__dirname, "public/assets"))); 
-
 
 /* FILE STORAGE */
-// when images are uploaded to the web site it gets stored in destination in public/assets folder
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, "public/assets");
-    },
-    filename: function (req, file, cb) {
-      cb(null, file.originalname);
-    },
-  });
-const upload = multer({ storage }); // use this variable to upload a file
-
+const storage = new GridFsStorage({
+  url: process.env.MONGO_URL,
+  file: (req, file) => {
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(16, (err, buf) => {
+        if (err) {
+          return reject(err);
+        }
+        const filename = buf.toString('hex') + path.extname(file.originalname);
+        const fileInfo = {
+          filename: filename,
+          bucketName: 'uploads'
+        };
+        resolve(fileInfo);
+      });
+    });
+  }
+});
+const upload = multer({ storage });
 
 /* ROUTES WITH FILES */
 app.post("/auth/signup", upload.single("profilePicture"), signup); // uploads the profile pic to storage
 app.post("/posts/savePost", verifyToken, upload.single("memoryPicture"), createPost); // uploads the memory image to storage
 
+app.use("/assets", imageRoutes);
 /* ROUTES */
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
