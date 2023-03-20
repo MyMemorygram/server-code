@@ -22,12 +22,12 @@ router.get("/:filename", (req, res, next) => {
                     });
                 }
         
-                if (files[0].contentType === 'image/jpeg' || files[0].contentType === 'image/png' || files[0].contentType === 'image/svg+xml') {
+                if (files[0].contentType === 'image/jpeg' || files[0].contentType === 'image/jpg' || files[0].contentType === 'image/png' || files[0].contentType === 'image/svg+xml') {
                     // render image to browser
                     gfs.openDownloadStreamByName(req.params.filename).pipe(res);
                 } else {
                     res.status(404).json({
-                        err: 'Not an image',
+                        err: 'Not an image of format jpeg, jpg, png or svg',
                     });
                 }
             });
