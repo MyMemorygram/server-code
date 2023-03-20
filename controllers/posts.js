@@ -7,7 +7,8 @@ import UserInfo from "../models/UserInfo.js";
 /* CREATE */
 export const createPost = async (req, res) => {
   try {
-    const { userId, story, imagePath } = req.body;
+    const { userId, story } = req.body;
+    const imagePath = req.file.filename;
     const user = await UserInfo.findById(userId);
     const newPost = new Post({
       userId,
@@ -82,17 +83,6 @@ export const deletePost = async (req, res) => {
     const userId = req.user.id;
     const { postId } = req.body;
     const post = await Post.find({ _id: postId});
-
-    /* delete image from assets folder */
-    const __dirname = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-    const finalpath = path.join(__dirname, "public/assets/")+ post[0].imagePath;
-    console.log(finalpath);
-    fs.unlink(finalpath, (err) => {
-      if (err) {
-        console.error(err)
-        return
-      }
-    });
 
     /* delete post from database */
     await Post.deleteOne({ _id: postId });

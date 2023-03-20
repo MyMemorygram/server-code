@@ -4,22 +4,19 @@ import UserInfo from "../models/UserInfo.js";
 
 /* USER SIGNUP */
 export const signup = async (req, res) => {
-    console.log("entered signup");
-    console.log(req.body);
     try {
       const {
         firstName,
         lastName,
         email,
         password,
-        profilePicturePath,
         location,
         bioDescription
       } = req.body;
-  
+
+      const profilePicturePath = req.file.filename;
       const salt = await bcrypt.genSalt(); // creates random salt using bcrypt and used to create password hash
       const passwordHash = await bcrypt.hash(password, salt);
-      console.log(profilePicturePath);
       const newUser = new UserInfo({
         firstName,
         lastName,
